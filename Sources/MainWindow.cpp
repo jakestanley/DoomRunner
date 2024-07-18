@@ -766,8 +766,24 @@ void MainWindow::setupMapPackList()
 	class EmptyIconProvider : public QFileIconProvider
 	{
 	 public:
-		virtual QIcon icon( IconType ) const override { return QIcon(); }
-		virtual QIcon icon( const QFileInfo & ) const override { return QIcon(); }
+		QIcon icon( IconType ) const override { return QIcon(); }
+		QIcon icon(const QFileInfo &info) const override
+    	{
+			if (info.isFile()) {
+				QString baseName = info.completeBaseName();
+				QString path = info.absolutePath();
+				QDir dir(path);
+				QStringList filters;
+				filters << baseName + ".txt";
+
+				QStringList matchingFiles = dir.entryList(filters, QDir::Files);
+				if (matchingFiles.size() > 0) {
+					return QIcon(":/TextFile.ico");
+				}
+			}
+			// return empty icon if no text file found
+			return QIcon();
+		}
 	};
 	mapModel.setIconProvider( new EmptyIconProvider );
 
